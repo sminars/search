@@ -3,7 +3,7 @@ Provides functionality for reading from/writing to the 3 index files used by
 indexer and querier in search
 """
 
-def write_title_file(title: str, dictionary: dict):
+def write_title_file(file_title: str, dictionary: dict):
     """
     Writes the dictionary of documents to titles into a file to be read in querying
     output looks like:
@@ -14,9 +14,9 @@ def write_title_file(title: str, dictionary: dict):
     :param dictionary: a hashmap that maps a page's id to its title
     :return: n/a
     """
-    with open(title, "w") as title_fh:
-        for id_num, title in dictionary.items():
-            title_fh.write(str(id_num) + "::" + title + "\n")
+    with open(file_title, "w") as title_fh:
+        for id_num, page_title in dictionary.items():
+            title_fh.write(str(id_num) + "::" + page_title + "\n")
 
 
 def write_document_file(docs: str, ids_to_pageranks: dict):

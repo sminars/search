@@ -1,0 +1,32 @@
+<xml>
+    <page>
+        <title>Oranges</title>
+        <id>1</id>
+        <text>Many people make orange juice.</text>
+    </page>
+    <page>
+        <title>New York City</title>
+        <id>2</id>
+        <text>NYC has many [[Skyscrapers|tall buildings.]]</text>
+    </page>
+    <page>
+        <title>Blood Oranges</title>
+        <id>3</id>
+        <text>Blood oranges are a type of [[Oranges|orange.]] We just love [[oranges]].</text>
+    </page>
+    <page>
+        <title>New Haven</title>
+        <id>4</id>
+        <text>Many people live here and commute to [[New York]].  There are no [[skyscrapers]] here.</text>
+    </page>
+    <page>
+        <title>Aluminum Foil</title>
+        <id>5</id>
+        <text>Used in kitchens, made out of [[aluminum]].</text>
+    </page>
+    <page>
+        <title>Skyscrapers</title>
+        <id>6</id>
+        <text>Tall buildings.</text>
+    </page>
+</xml>
