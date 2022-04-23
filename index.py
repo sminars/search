@@ -18,12 +18,13 @@ class Indexer:
         self.stemmer = PorterStemmer()
         self.corpus = {} # keys = words, values = indices
         self.index = 0
+        self.word_counts = []
         self.make_corpus(self.all_pages)
        
        
       
 
-    def add_to_corpus(self, words: str):
+    def add_to_corpus(self, words: str, info):
         """tokenizes, lower cases, and stems the elements of words and adds non-
         stop words to self.corpus"""
         tokens = re.findall(self.n_regex, words)
@@ -33,6 +34,15 @@ class Indexer:
                 if stemmed_wrd not in self.corpus:
                     self.corpus[stemmed_wrd] = self.index
                     self.index += 1
+                    # also add a new column in page row and in word_counts
+                    info[0].append(1)
+                    for row in self.word_counts:
+                        row.append(0)
+                else:
+                    info[0][self.corpus[stemmed_wrd]] += 1
+                    # update maximum value of this row
+                if info[0][self.corpus[stemmed_wrd]] > info[1]:
+                    info[1] = info[0][self.corpus[stemmed_wrd]]
         
 
     def make_corpus(self, pages : list):
@@ -40,13 +50,15 @@ class Indexer:
        
         ids = []
         id2pn = {}  # page ids to list of names of pages linked to
+        max_in_each_row = []
 
-        word_counts = []
         for page in pages:
             pid = int(page.find('id').text.strip())
             ids.append(pid)
             id2pn[pid] = []
-            page_row = []
+            page_row = [0] * len(self.corpus)
+            current_row_max = 0
+            page_info = [page_row, current_row_max]
             
             page_words = re.findall(self.n_regex, page.find('title').text + " " + page.find('text').text)
 
@@ -56,18 +68,21 @@ class Indexer:
                     if '|' in w:
                         link_page, link_text = w.split('|')
                         id2pn[pid].append(link_page.lower())
-                        self.add_to_corpus(link_text)
+                        self.add_to_corpus(link_text, page_info)
                     elif ':' in w:
                         id2pn[pid].append(w)
                         w = w.replace(":", " ")
-                        self.add_to_corpus(w)
+                        self.add_to_corpus(w, page_info)
                     else:  # links where the text is the name of the page
                         id2pn[pid].append(w)
-                        self.add_to_corpus(w)
+                        self.add_to_corpus(w, page_info)
                 # elif word.lower() not in STOP_WORDS:
                 #     self.corpus.add(stemmer.stem(word.lower()))
                 else:
-                    self.add_to_corpus(word)
+                    self.add_to_corpus(word, page_info)
+
+            self.word_counts.append(page_info[0])
+            max_in_each_row.append(page_info[1])
                 
 
        # print(id2pn)
@@ -75,6 +90,9 @@ class Indexer:
         # print("the" in STOP_WORDS)
         #print(self.corpus)
         #self.calculate_tf(id2pn)
+        for row in self.word_counts:
+            print(row)
+        print(max_in_each_row)
 
     def calculate_tf(self, pages : dict):
 
