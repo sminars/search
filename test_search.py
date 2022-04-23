@@ -14,5 +14,10 @@ def test_word_processing():
     assert len(ind.corpus) == len(expected_corpus)
     for word in expected_corpus:
         assert word in ind.corpus
+
+def test_arguments():
+    with pytest.raises(ArgumentError):
+        Indexer(["1", "2", "3"])
+        Indexer(["1", "2", "3", "4", "5"])
     
     
