@@ -89,29 +89,16 @@ class Indexer:
       #  print(ids)
         # print("the" in STOP_WORDS)
         #print(self.corpus)
-        #self.calculate_tf(id2pn)
         for row in self.word_counts:
             print(row)
         print(max_in_each_row)
+        self.calculate_tf(max_in_each_row)
+        for row in self.word_counts:
+            print(row)
 
-    def calculate_tf(self, pages : dict):
-
-      
-        numRows = len(pages)
-        numCols = len(self.corpus)
-        tf_array = [[0 for i in range(numCols)] for j in range(numRows)]
-
-        for r, pg in enumerate(self.all_pages):
-            page_words = re.findall(self.n_regex, pg.find('title').text + " " + pg.find('text').text)
-            for wrd in page_words:
-                if wrd.lower() not in self.STOP_WORDS:
-                    stemmed_wrd = self.stemmer.stem(wrd.lower())
-                    tf_array[r][self.corpus[stemmed_wrd]] += 1
-
-        
-        for row in range(numRows):
-            print(tf_array[row])
-
+    def calculate_tf(self, maxs: list):
+        for idx, row in enumerate(self.word_counts):
+            self.word_counts[idx] = [wc / maxs[idx] for wc in row]
 
 if __name__ == "__main__":
     idxr = Indexer(sys.argv[1:])
