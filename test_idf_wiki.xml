@@ -1,0 +1,22 @@
+<xml>
+    <page>
+        <title>Oranges</title>
+        <id>1</id>
+        <text>people</text>
+    </page>
+    <page>
+        <title>City</title>
+        <id>2</id>
+        <text>[[Color|blue]]</text>
+    </page>
+    <page>
+        <title>People</title>
+        <id>3</id>
+        <text>People in cities.</text>
+    </page>
+    <page>
+        <title>Blue</title>
+        <id>4</id>
+        <text> people, oranges, and [[blues]] </text>
+    </page>
+</xml>
