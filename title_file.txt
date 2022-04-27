@@ -1,4 +1,11 @@
 1::Oranges
-2::City
-3::People
-4::Blue
+2::New York City
+3::Blood Oranges
+4::New Haven
+5::Aluminum Foil
+6::Skyscrapers
+7::Billiards
+8::Dogs
+9::Cats
+10::Frogs
+11::Prince

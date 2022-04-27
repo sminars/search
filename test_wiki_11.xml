@@ -1,0 +1,57 @@
+<xml>
+    <page>
+        <title>Oranges</title>
+        <id>1</id>
+        <text>Many people make orange juice.</text>
+    </page>
+    <page>
+        <title>New York City</title>
+        <id>2</id>
+        <text>NYC has many [[Skyscrapers|tall buildings.]]</text>
+    </page>
+    <page>
+        <title>Blood Oranges</title>
+        <id>3</id>
+        <text>Blood oranges are a type of [[Oranges|orange.]] We just love [[oranges]].</text>
+    </page>
+    <page>
+        <title>New Haven</title>
+        <id>4</id>
+        <text>Many people live here and commute to [[New York]].  There are no [[skyscrapers]] here.</text>
+    </page>
+    <page>
+        <title>Aluminum Foil</title>
+        <id>5</id>
+        <text>Used in kitchens, made out of [[aluminum]].</text>
+    </page>
+    <page>
+        <title>Skyscrapers</title>
+        <id>6</id>
+        <text>Tall buildings.</text>
+    </page>
+    <page>
+        <title>Billiards</title>
+        <id>7</id>
+        <text>Popular [[Category:Sport]] in England.</text>
+    </page>
+    <page>
+        <title>Dogs</title>
+        <id>8</id>
+        <text>Not like [[cats]].</text>
+    </page>
+    <page>
+        <title>Cats</title>
+        <id>9</id>
+        <text>Superior animals.</text>
+    </page>
+    <page>
+        <title>Frogs</title>
+        <id>10</id>
+        <text>Classified as  [[Category:Amphibians]], may turn into a prince.</text>
+    </page>
+    <page>
+        <title>Prince</title>
+        <id>11</id>
+        <text>Purple Rain</text>
+    </page>
+</xml>

@@ -8,15 +8,22 @@ from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
 import file_io
 
+class IndexInfo:
+    def __init__(self, idf_arr, max_per_row, word_counts):
+        self.idf_array = idf_arr
+        self.max_frequency_per_row = max_per_row
+        self.word_counts = word_counts
+
+
 class Indexer:
     def __init__(self, args):
         if len(args) != 4:
             raise ArgumentError("Must have exactly 4 arguments after index.py -- try again.")
         
         xml_file = args[0]
-        title_file = args[1]
-        docs_file = args[2]
-        words_file = args[3]
+        self.title_file = args[1]
+        self.docs_file = args[2]
+        self.words_file = args[3]
 
         root: "Element" = et.parse(xml_file).getroot()
         self.page_ids = []  # list of tuples with (page ID, page title)
@@ -26,9 +33,16 @@ class Indexer:
         self.tf_array = []
         self.idf_array = []
         self.relevance = []
+
+        # ii = self.make_corpus(root.findall("page"))
+        # rel_array = self.make_relevance(ii)
+        # words_to_rel = self.make_wtr_dict(rel_array)
+
         self.make_corpus(root.findall("page"))
         self.calculate_relevance()
-        self.write_files(title_file, words_file)
+        self.write_files(self.title_file, self.words_file)
+
+        # should creating an indexer do everything, or just initialize the vars?
           
     def add_to_corpus(self, words: str, info: list, idf: list):
         """tokenizes, lower cases, and stems the elements of words and adds non-
@@ -37,6 +51,8 @@ class Indexer:
         parameters:
         info - two-element list where index 0 is a row of word counts and index 1 is an
         int representing the current maximum word count in that row
+        idf - list where we keep track of the number of documents each word 
+        appears in
         """
         STOP_WORDS = set(stopwords.words('english'))
         stemmer = PorterStemmer()
@@ -71,8 +87,8 @@ class Indexer:
         """takes in xml pages and populates global variable corpus"""        
        
         id2pn = {}  # page ids to list of names of pages linked to
-        max_in_each_row = [] # number of times most frequent word appears for each page
-        idf_arr = [] # same length as corpus, keeps track of n_i counts
+        max_in_each_row = [] # keeps track of frequency of most frequent word for each page
+        idf_arr = [] # keeps track of n_i counts for each word in corpus
 
         for page in pages:
             pid = int(page.find('id').text.strip())
@@ -80,8 +96,9 @@ class Indexer:
             self.page_ids.append((pid, title))
             id2pn[pid] = []
             page_row = [0] * len(self.corpus)
-            current_row_max = 0
-            page_info = [page_row, current_row_max]
+            # two-element list: first element is a list of word counts for the 
+            # page, and the second element is the most common word's frequency
+            page_info = [page_row, 0]
             
             page_words = re.findall(self.n_regex, page.find('title').text + " " + page.find('text').text)
 
@@ -107,8 +124,10 @@ class Indexer:
                 
         self.calculate_tf(max_in_each_row)
         self.calculate_idf(idf_arr)
-        # self.calculate_relevance()
-        # self.write_files()
+
+        # could we instead make this function take in the list of pages and 
+        # return idf_arr and max_in_each_row and tf_array and id2pn?
+        
 
     def calculate_tf(self, maxs: list):
         for idx, row in enumerate(self.tf_array):
@@ -125,9 +144,11 @@ class Indexer:
     def write_files(self, title_file: str, words_file: str):
         words_to_relevance = {}
 
+        # this should go in a method that takes in a relevance array and returns
+        # a words to relevance dictionary
         for col_idx, word in enumerate(self.corpus.keys()):
             ids_to_relevance = {}
-            for row_idx, row in enumerate(self.relevance):
+            for row_idx in range(len((self.relevance))):
                 page_id = self.page_ids[row_idx][0]
                 ids_to_relevance[page_id] = self.relevance[row_idx][col_idx]
 
@@ -140,5 +161,6 @@ class Indexer:
 
 
 if __name__ == "__main__":
+    """this should be the "view" of the model view controller"""
     idxr = Indexer(sys.argv[1:])
-   
+    print("File successfully indexed!")
