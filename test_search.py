@@ -84,5 +84,19 @@ def test_querier():
     builds_results = q11.retrieve_results(querier.processed_search_terms("bUiLds"))
     assert len(builds_results) == 10  #even though there are > 10 pages
 
+def test_weights():
+    """test that pagerank weights are appropriately calculated for various kinds
+    of pages: ones with no links at all, only links to outside corpus, and with
+    different numbers of in-corpus links"""
+    expected_weights = [
+        [.0375, .0375 + 0.85/3, .0375 + 0.85/3, .0375 + 0.85/3],
+        [.0375 + 0.85/3, .0375, .0375 + 0.85/3, .0375 + 0.85/3],
+        [.4625, .4625, .0375, .0375],
+        [.0375, .0375, .8875, .0375]
+    ]
 
+    ind_w = Indexer(["test_weights_wiki.xml", "title_file.txt", "", "words_file.txt"])
+    for r in range(4):
+        for c in range(4):
+            assert ind_w.weights[r][c] == pytest.approx(expected_weights[r][c])
 
