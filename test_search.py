@@ -1,10 +1,11 @@
 import pytest
 from index import *
 from query import *
+from file_io import *
 
 def test_word_processing():
     """ensure that Indexer adds the words to the corpus that we'd expect"""
-    ind = Indexer(["small_test_wiki.xml", "title_file.txt", "", "words_file.txt"])
+    ind = Indexer(["small_test_wiki.xml", "title_file.txt", "docs_file.txt", "words_file.txt"])
 
     expected_corpus = ['juic', 'york', 'blood', 'love', 'mani', 'sport', 
                         'england', 'build', 'popular', 'kitchen', 'peopl', 
@@ -33,7 +34,7 @@ def test_tf():
         'citi', 'new', 'build'
     ]
     
-    ind = Indexer(["pipelink_tiny_wiki.xml", "title_file.txt", "", "words_file.txt"])
+    ind = Indexer(["pipelink_tiny_wiki.xml", "title_file.txt", "docs_file.txt", "words_file.txt"])
 
     assert len(ind.corpus) == len(expected_corpus)
     for word in expected_corpus:
@@ -43,33 +44,38 @@ def test_tf():
         [1.0, 1.0, 0.5, 0.5, 0.5, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0],
         [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0]
     ]
-
-   
-
-    assert ind.tf_array == expected_tf
+    ind.reset_variables()
+    tf_array = ind.make_tf_array(ind.make_corpus(ind.get_pages("pipelink_tiny_wiki.xml"))) 
+    assert tf_array == expected_tf
     
 
 def test_idf():
-    ind_tiny = Indexer(["pipelink_tiny_wiki.xml", "title_file.txt", "", "words_file.txt"])
+    ind_tiny = Indexer(["pipelink_tiny_wiki.xml", "title_file.txt", "docs_file.txt", "words_file.txt"])
     expected_idf = [math.log(2)] * 11
-    assert ind_tiny.idf_array == expected_idf
+    ind_tiny.reset_variables()
+    idf_array = ind_tiny.make_corpus(ind_tiny.get_pages("pipelink_tiny_wiki.xml")).idf_array
+    assert idf_array == expected_idf
 
-    ind_test_idf = Indexer(["test_idf_wiki.xml", "title_file.txt", "", "words_file.txt"])
+    ind_test_idf = Indexer(["test_idf_wiki.xml", "title_file.txt", "docs_files.txt", "words_file.txt"])
     expected = [math.log(2), math.log(4/3), math.log(2), math.log(2)]
-    assert ind_test_idf.idf_array == expected
+    ind_test_idf.reset_variables()
+    idf = ind_test_idf.make_corpus(ind_test_idf.get_pages("test_idf_wiki.xml")).idf_array
+    assert idf == expected
 
 def test_relevance():
-    ind_test_idf = Indexer(["test_idf_wiki.xml", "title_file.txt", "", "words_file.txt"])
+    ind_test_idf = Indexer(["test_idf_wiki.xml", "title_file.txt", "docs_file.txt", "words_file.txt"])
     expected_rel = [
         [math.log(2), math.log(4/3), 0, 0],
         [0, 0, math.log(2), math.log(2)],
         [0, math.log(4/3), math.log(2)/2, 0],
         [math.log(2)/2, math.log(4/3)/2, 0, math.log(2)]
     ]
-    assert ind_test_idf.relevance == expected_rel
+    ind_test_idf.reset_variables()
+    rel_array = ind_test_idf.make_scores(ind_test_idf.make_corpus(ind_test_idf.get_pages("test_idf_wiki.xml")))[0]
+    assert rel_array == expected_rel
 
 def test_querier():
-    args = ["test_idf_wiki.xml", "title_file.txt", "", "words_file.txt"]
+    args = ["test_idf_wiki.xml", "title_file.txt", "docs_file.txt", "words_file.txt"]
     ind_q = Indexer(args)
     querier = Query(args[1:])
     blue_results = querier.retrieve_results(querier.processed_search_terms("blue"))
@@ -77,7 +83,7 @@ def test_querier():
     cat_results = querier.retrieve_results(querier.processed_search_terms("cat"))
     assert len(cat_results) == 0
 
-    args_11 = ["test_wiki_11.xml", "title_file.txt", "", "words_file.txt"]
+    args_11 = ["test_wiki_11.xml", "title_file.txt","docs_file.txt", "words_file.txt"]
     ind_11 = Indexer(args_11)
     q11 = Query(args_11[1:])
     # "built" is not in the test wiki, but should return results from stemming
@@ -94,9 +100,23 @@ def test_weights():
         [.4625, .4625, .0375, .0375],
         [.0375, .0375, .8875, .0375]
     ]
-
-    ind_w = Indexer(["test_weights_wiki.xml", "title_file.txt", "", "words_file.txt"])
+  
+    ind_w = Indexer(["test_weights_wiki.xml", "title_file.txt", "docs_file.txt", "words_file.txt"])
+    ind_w.reset_variables()
+    weights = ind_w.make_corpus(ind_w.get_pages("test_weights_wiki.xml")).weights
     for r in range(4):
         for c in range(4):
-            assert ind_w.weights[r][c] == pytest.approx(expected_weights[r][c])
+            assert weights[r][c] == pytest.approx(expected_weights[r][c])
+
+def test_ranks_ex1():
+    """tests a wiki where first page has 2 links, second page has no links, and third page has pipe link"""
+    ind = Indexer(["PageRankExample1.xml", "title_file.txt", "docs_file.txt", "words_file.txt"])
+    expected = [0.4326,0.2340,0.3333]
+    ids_to_pageranks = {}
+    read_docs_file("docs_file.txt", ids_to_pageranks)
+    for i in range(3):
+        assert list(ids_to_pageranks.values())[i] == pytest.approx(expected[i], abs = .0001)
+    
+
+
 

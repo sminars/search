@@ -134,18 +134,18 @@ class Indexer:
         # return idf_arr and max_in_each_row and tf_array and id2pn?
         
 
-    def calculate_tf(self, maxs: list):
-        for idx, row in enumerate(self.tf_array):
-            self.tf_array[idx] = [wc / maxs[idx] for wc in row]
+    # def calculate_tf(self, maxs: list):
+    #     for idx, row in enumerate(self.tf_array):
+    #         self.tf_array[idx] = [wc / maxs[idx] for wc in row]
 
     def calculate_idf(self, n_i_list: list) -> list:
         """converts an n_i counts list into an IDF scores list"""
         n = len(self.page_ids)
         return [math.log(n / n_i) for n_i in n_i_list]
     
-    def calculate_relevance(self):
-        for r in self.tf_array:
-            self.relevance.append([elem * self.idf_array[idx] for idx, elem in enumerate(r)])
+    # def calculate_relevance(self):
+    #     for r in self.tf_array:
+    #         self.relevance.append([elem * self.idf_array[idx] for idx, elem in enumerate(r)])
 
     def make_dicts(self, rel_and_ranks) -> dict:
         """converts relevance array to a dictionary of words to dict(ids, rel)"""
@@ -206,17 +206,33 @@ class Indexer:
     def get_pages(self, xml_file: str) -> list:
         """returns the list of pages from a given xml file"""
         root: "Element" = et.parse(xml_file).getroot()
-        return root.findall("page")
-
-    def write_files(self, xml_file: str, title_file: str, docs_file: str, words_file: str):
-        pages = self.get_pages(xml_file)
+        pages = root.findall("page")
         for index, page in enumerate(pages):
             pid = int(page.find('id').text.strip())
             title = page.find('title').text.strip()
             self.page_ids.append((pid, title))
             self.title_to_id[title] = pid
             self.id_to_index[pid] = index
+        return pages
+
+    def reset_variables(self):
+        self.page_ids = []  # list of tuples with (page ID, page title)
+        self.title_to_id = {} # look up page IDs by title
+        self.id_to_index = {}
+        self.n_regex = '''\[\[[^\[]+?\]\]|[a-zA-Z0-9]+'[a-zA-Z0-9]+|[a-zA-Z0-9]+'''
+        self.corpus = {} # keys = words, values = indices
+        self.corpus_index = 0  
+
+    def write_files(self, xml_file: str, title_file: str, docs_file: str, words_file: str):
+        pages = self.get_pages(xml_file)
+        # for index, page in enumerate(pages):
+        #     pid = int(page.find('id').text.strip())
+        #     title = page.find('title').text.strip()
+        #     self.page_ids.append((pid, title))
+        #     self.title_to_id[title] = pid
+        #     self.id_to_index[pid] = index
         # self.weights = [[0 for c in range(len(self.page_ids))] for r in range(len(self.page_ids))]
+       
         wtr_dict, ids_to_pageranks = self.make_dicts(self.make_scores(self.make_corpus(pages)))
         # pass words_to_relevance into file_io to write to words file
         file_io.write_words_file(words_file, wtr_dict)
