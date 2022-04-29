@@ -56,7 +56,7 @@ def test_idf():
     idf_array = ind_tiny.make_corpus(ind_tiny.get_pages("pipelink_tiny_wiki.xml")).idf_array
     assert idf_array == expected_idf
 
-    ind_test_idf = Indexer(["test_idf_wiki.xml", "title_file.txt", "docs_files.txt", "words_file.txt"])
+    ind_test_idf = Indexer(["test_idf_wiki.xml", "title_file.txt", "docs_file.txt", "words_file.txt"])
     expected = [math.log(2), math.log(4/3), math.log(2), math.log(2)]
     ind_test_idf.reset_variables()
     idf = ind_test_idf.make_corpus(ind_test_idf.get_pages("test_idf_wiki.xml")).idf_array

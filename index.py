@@ -82,6 +82,84 @@ class Indexer:
             id2pn[pid].append(self.title_to_id[link])
         self.add_to_corpus(link_text, page_info, ni_counts, word_counts, corpus)
 
+    def process_word(self, pid, word: str, word_info, page_info):
+        """returns a stemmed, lower cased word if it's not a stop word, otherwise
+        returns False"""
+        STOP_WORDS = set(stopwords.words('english'))
+        stemmer = PorterStemmer()
+
+        if word.lower() not in STOP_WORDS:
+            w = stemmer.stem(word.lower())
+            self.update_corpus(pid, w, word_info, page_info)
+
+    def update_links(self, pid: int, link_page: str, word_info, page_info):
+        """stuff"""
+        # update link information for link_page, including the page IDs of the from
+        # and to pages, weights, number of unique links per page, etc.
+        linked_pages = page_info[pid][1]
+        if link_page in self.title_to_id: # if linked page is in our set of pages
+            linked_page_id = self.title_to_id[link_page]
+            if linked_page_id not in linked_pages:
+                linked_pages[linked_page_id] = 0.85  # initialize weight
+
+    def process_link(self, pid: int, link_string: str, word_info, page_info):
+        """returns link text and sends link page to update link info"""
+        link_page = link_string
+        link_text = link_string
+        if '|' in link_string:
+            link_page, link_text = link_string.split('|', 1)
+        elif ':' in link_string:
+             link_text = link_string.replace(":", " ")
+
+        update_links(pid, link_page, word_info, page_info)
+        for word in re.findall(self.n_regex, link_text):
+            self.process_word(pid, word, word_info, page_info)
+
+    def update_corpus(self, pid: int, word: str, word_info, page_info):
+        """stuff"""
+        word_count = 0 # updated word count of given word in given page
+        if word not in word_info:
+            word_info[word] = (1, {pid: 1}) # n_i count, dict of ids to word counts
+            word_count = 1
+        else: # word is already in corpus
+            word_counts = word_info[word][1]
+            if pid in word_counts: # increment word count by one
+                word_counts[pid] += 1
+                word_count = word_counts[pid]
+            else: # word has not been counted on this page before
+                word_counts[pid] = 1
+                word_count = 1
+                word_info[0] += 1 # increment n_i count by 1
+        
+        # update maximum word frequency for the current page, if necessary
+        if word_count > page_info[pid][0]:
+            page_info[pid][0] = word_count
+
+    def process_pages(self, pages: list):
+        """takes in xml pages and does stuff"""
+        word_info = {}  # dict of processed words to info that we keep track of for words
+        # ni counts, word counts per page (nonzero), 
+        page_info = {}  # dict of page IDs to info that we track of for pages
+
+        for page in pages:
+            pid = int(page.find('id').text.strip())
+            page_info[pid] = (0, {})  # max word frequency per page, dict of linked page ids to weights
+
+            page_elems = re.findall(self.n_regex, page.find('title').text + " " + page.find('text').text)
+            for elem in page_elems:
+                if re.match('\[\[[^\[]+?\]\]', elem):
+                    process_link(pid, elem, word_info, page_info)  # also does link stuff
+                else:
+                    self.process_word(pid, elem, word_info, page_info)
+            
+            linked_pages = page_info[pid][1]
+            if not linked_pages:  # if there are no unique links
+                for page in self.title_to_id.values():
+                    if page != pid:
+                        linked_pages[page] = 0.85/(len(self.title_to_id) - 1) + 0.15/len(self.title_to_id)
+            else:  # there is at least one unique link
+                for page in linked_pages.keys():
+                    linked_pages[page] = 0.85/len(linked_pages) + 0.15/len(self.title_to_id)
 
     def make_corpus(self, pages : list):
         """takes in xml pages and populates global variable corpus"""        
@@ -176,6 +254,7 @@ class Indexer:
             ids_to_relevance = {}
             for row_idx in range(len((rel_array))):
                 page_id = self.page_ids[row_idx][0]
+                # maybe don't store it if it's 0? 
                 ids_to_relevance[page_id] = rel_array[row_idx][col_idx]
 
             words_to_relevance[word] = ids_to_relevance
@@ -242,13 +321,6 @@ class Indexer:
 
     def write_files(self, xml_file: str, title_file: str, docs_file: str, words_file: str):
         pages = self.get_pages(xml_file)
-        # for index, page in enumerate(pages):
-        #     pid = int(page.find('id').text.strip())
-        #     title = page.find('title').text.strip()
-        #     self.page_ids.append((pid, title))
-        #     self.title_to_id[title] = pid
-        #     self.id_to_index[pid] = index
-        # self.weights = [[0 for c in range(len(self.page_ids))] for r in range(len(self.page_ids))]
        
         wtr_dict, ids_to_pageranks = self.make_dicts(self.make_scores(self.make_corpus(pages)))
         # pass words_to_relevance into file_io to write to words file

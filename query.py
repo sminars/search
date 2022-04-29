@@ -45,17 +45,21 @@ class Query:
 
     def retrieve_results(self, words: list) -> list:
         """takes in list of processed words and returns a list of page titles"""
+        print("Reading in titles...")
         ids_to_titles = {}
         read_title_file(self.title_file, ids_to_titles)
 
+        print("Reading in words...")  # this is where query is taking the most time
         words_to_relevance_dict = {}
         read_words_file(self.words_file, words_to_relevance_dict)
 
+        print("Reading in docs...")
         ids_to_pagerank = {}
         read_docs_file(self.docs_file, ids_to_pagerank)
 
         ids_to_total_relevance = {}
        
+        print("Looking up values...")
         for word in words:
             if word in words_to_relevance_dict:
                 for kvpair in words_to_relevance_dict[word].items():
@@ -64,9 +68,9 @@ class Query:
                     else:
                         ids_to_total_relevance[kvpair[0]] += self.calc_score(ids_to_pagerank[kvpair[0]], kvpair[1]) 
         
+        print("Sorting...")  # this is also taking longer than it should. 
+        # maybe try storing results in a heap or some other sorted thing as we go?
         sorted_ids = sorted(ids_to_total_relevance.items(), key=lambda x: x[1], reverse=True)
-        print(sorted_ids)
-        print()
         results = []
         num_results = len(sorted_ids)
         num_results_to_return = min(10, num_results)
@@ -91,6 +95,7 @@ class Query:
 
     def processed_search_terms(self, search_terms: str) -> list:
         """blah"""
+        print("Processing search terms...")
         n_regex = '''\[\[[^\[]+?\]\]|[a-zA-Z0-9]+'[a-zA-Z0-9]+|[a-zA-Z0-9]+'''
         STOP_WORDS = set(stopwords.words('english'))
         stemmer = PorterStemmer()
