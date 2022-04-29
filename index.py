@@ -95,20 +95,20 @@ class Indexer:
                     w = word[2:-2]
                     if '|' in w:
                         link_page, link_text = w.split('|', 1)
-                        if link_page in self.title_to_id and self.title_to_id[link_page] not in id2pn[pid]:
+                        if link_page in self.title_to_id and self.title_to_id[link_page] not in id2pn[pid] and pid != self.title_to_id[link_page]:
                             weights[self.id_to_index[pid]][self.id_to_index[self.title_to_id[link_page]]] = 0.85
                             num_unique_links += 1
                             id2pn[pid].append(self.title_to_id[link_page])
                         self.add_to_corpus(link_text, page_info, ni_counts, word_counts)
                     elif ':' in w:
-                        if w in self.title_to_id and self.title_to_id[w] not in id2pn[pid]:
+                        if w in self.title_to_id and self.title_to_id[w] not in id2pn[pid] and pid != self.title_to_id[w]:
                             weights[self.id_to_index[pid]][self.id_to_index[self.title_to_id[w]]] = 0.85
                             num_unique_links += 1
                             id2pn[pid].append(self.title_to_id[w])  # we aren't sure if category pages should count as links
                         w = w.replace(":", " ")
                         self.add_to_corpus(w, page_info, ni_counts, word_counts)
                     else:  # links where the text is the name of the page
-                        if w in self.title_to_id and self.title_to_id[w] not in id2pn[pid]:
+                        if w in self.title_to_id and self.title_to_id[w] not in id2pn[pid] and pid != self.title_to_id[w]:
                             weights[self.id_to_index[pid]][self.id_to_index[self.title_to_id[w]]] = 0.85
                             num_unique_links += 1
                             id2pn[pid].append(self.title_to_id[w])

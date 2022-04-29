@@ -116,7 +116,45 @@ def test_ranks_ex1():
     read_docs_file("docs_file.txt", ids_to_pageranks)
     for i in range(3):
         assert list(ids_to_pageranks.values())[i] == pytest.approx(expected[i], abs = .0001)
-    
+
+def test_ranks_ex2():
+    """tests pagerank example 2 wiki"""
+    ind = Indexer(["PageRankExample2.xml", "title_file.txt", "docs_file.txt", "words_file.txt"])
+    expected = [0.2018, 0.0375, 0.3740, 0.3867]
+    ids_to_pageranks = {}
+    read_docs_file("docs_file.txt", ids_to_pageranks)
+    for i in range(len(expected)):
+        assert list(ids_to_pageranks.values())[i] == pytest.approx(expected[i], abs = .0001)
+
+def test_ranks_ex3():
+    """tests pagerank example 3 wiki"""
+    ind = Indexer(["PageRankExample3.xml", "title_file.txt", "docs_file.txt", "words_file.txt"])
+    expected = [0.0524, 0.0524, 0.4476, 0.4476]
+    ids_to_pageranks = {}
+    read_docs_file("docs_file.txt", ids_to_pageranks)
+    for i in range(len(expected)):
+        assert list(ids_to_pageranks.values())[i] == pytest.approx(expected[i], abs = .0001)
+   
+
+def test_ranks_ex4():
+    """tests pagerank example 4 wiki"""
+    ind = Indexer(["PageRankExample4.xml", "title_file.txt", "docs_file.txt", "words_file.txt"])
+    expected = [0.0375, 0.0375, 0.4625, 0.4625]
+    ids_to_pageranks = {}
+    read_docs_file("docs_file.txt", ids_to_pageranks)
+    for i in range(len(expected)):
+        assert list(ids_to_pageranks.values())[i] == pytest.approx(expected[i], abs = .0001)
+
+def test_ranks_100():
+    ind = Indexer(["PageRankWiki.xml", "title_file.txt", "docs_file.txt", "words_file.txt"])
+   
+    ids_to_pageranks = {}
+    read_docs_file("docs_file.txt", ids_to_pageranks)
+
+    sum = 0
+    for rank in ids_to_pageranks.values():
+        sum += rank
+    assert sum == pytest.approx(1)
 
 
 
