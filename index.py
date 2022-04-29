@@ -68,6 +68,20 @@ class Indexer:
                 if info[0][corpus[stemmed_wrd]] > info[1]:
                     info[1] = info[0][corpus[stemmed_wrd]]
         
+    def link_helper(self, w: str,  id2pn: list, pid: list, weights: list, page_info: list, ni_counts: list, word_counts: list, corpus: dict):
+        link = w
+        link_text = w
+        if '|' in w:
+            link, link_text = w.split('|', 1)
+        elif ':' in w:
+             link_text = w.replace(":", " ")
+
+        if link in self.title_to_id and self.title_to_id[link] not in id2pn[pid] and pid != self.title_to_id[link]:
+            weights[self.id_to_index[pid]][self.id_to_index[self.title_to_id[link]]] = 0.85
+            num_unique_links += 1
+            id2pn[pid].append(self.title_to_id[link])
+        self.add_to_corpus(link_text, page_info, ni_counts, word_counts, corpus)
+
 
     def make_corpus(self, pages : list):
         """takes in xml pages and populates global variable corpus"""        
