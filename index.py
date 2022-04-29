@@ -92,18 +92,19 @@ class Indexer:
             w = stemmer.stem(word.lower())
             self.update_corpus(pid, w, word_info, page_info)
 
-    def update_links(self, pid: int, link_page: str, word_info, page_info):
+    def process_link(self, pid: int, link_page: str, word_info, page_info):
         """stuff"""
         # update link information for link_page, including the page IDs of the from
         # and to pages, weights, number of unique links per page, etc.
         linked_pages = page_info[pid][1]
         if link_page in self.title_to_id: # if linked page is in our set of pages
             linked_page_id = self.title_to_id[link_page]
-            if linked_page_id not in linked_pages:
-                linked_pages[linked_page_id] = 0.85  # initialize weight
+            if linked_page_id not in linked_pages and linked_page_id != pid:
+                linked_pages[linked_page_id] = 0.85  # initialize to 1 - E
 
-    def process_link(self, pid: int, link_string: str, word_info, page_info):
-        """returns link text and sends link page to update link info"""
+    def handle_link(self, pid: int, link_string: str, word_info, page_info):
+        """identifies link page and link text, and sends link text to be processed
+        as words and link text to be processed as links"""
         link_page = link_string
         link_text = link_string
         if '|' in link_string:
@@ -111,35 +112,51 @@ class Indexer:
         elif ':' in link_string:
              link_text = link_string.replace(":", " ")
 
-        update_links(pid, link_page, word_info, page_info)
+        self.process_link(pid, link_page, word_info, page_info)
         for word in re.findall(self.n_regex, link_text):
             self.process_word(pid, word, word_info, page_info)
 
     def update_corpus(self, pid: int, word: str, word_info, page_info):
         """stuff"""
-        word_count = 0 # updated word count of given word in given page
+        word_count = 1 # word count of given word in given page
+
         if word not in word_info:
             word_info[word] = (1, {pid: 1}) # n_i count, dict of ids to word counts
-            word_count = 1
         else: # word is already in corpus
-            word_counts = word_info[word][1]
-            if pid in word_counts: # increment word count by one
+            word_counts = word_info[word][1]  # the dictionary of word counts for this page
+            if pid in word_counts: # word has been counted on this page before
                 word_counts[pid] += 1
                 word_count = word_counts[pid]
             else: # word has not been counted on this page before
                 word_counts[pid] = 1
-                word_count = 1
                 word_info[0] += 1 # increment n_i count by 1
         
         # update maximum word frequency for the current page, if necessary
         if word_count > page_info[pid][0]:
             page_info[pid][0] = word_count
 
-    def process_pages(self, pages: list):
+    def populate_weights(self, pid: int, page_info: dict):
+        linked_pages = page_info[pid][1] # dictionary of pages to weights
+        if not linked_pages:  # if there are no unique links
+            for page in self.title_to_id.values():
+                if page != pid:  # record one link to every other page
+                    linked_pages[page] = self.calc_link_weight(len(self.title_to_id) - 1, len(self.title_to_id))
+        else:
+            for page in linked_pages.keys():
+                linked_pages[page] = self.calc_link_weight(len(linked_pages), len(self.title_to_id))
+
+    def calc_link_weight(self, num_unique_links: int, num_pages: int) -> float:
+        """calculates the weight that a page k gives to a linked page j,
+        given k's number of unique links and the total number of pages"""
+        ee = 0.15
+        return (1 - ee)/num_unique_links + ee/num_pages
+
+    def process_pages(self, pages: list, word_info, page_info):
         """takes in xml pages and does stuff"""
-        word_info = {}  # dict of processed words to info that we keep track of for words
-        # ni counts, word counts per page (nonzero), 
-        page_info = {}  # dict of page IDs to info that we track of for pages
+
+        # word info has keys as words, values as tuple of (ni counts, dict of ids to word counts)
+
+        # page_info keys are IDs, values are tuple of (max freq, dict of linked IDs to weights)
 
         for page in pages:
             pid = int(page.find('id').text.strip())
@@ -148,18 +165,28 @@ class Indexer:
             page_elems = re.findall(self.n_regex, page.find('title').text + " " + page.find('text').text)
             for elem in page_elems:
                 if re.match('\[\[[^\[]+?\]\]', elem):
-                    process_link(pid, elem, word_info, page_info)  # also does link stuff
+                    self.handle_link(pid, elem, word_info, page_info)  # also does link stuff
                 else:
                     self.process_word(pid, elem, word_info, page_info)
-            
-            linked_pages = page_info[pid][1]
-            if not linked_pages:  # if there are no unique links
-                for page in self.title_to_id.values():
-                    if page != pid:
-                        linked_pages[page] = 0.85/(len(self.title_to_id) - 1) + 0.15/len(self.title_to_id)
-            else:  # there is at least one unique link
-                for page in linked_pages.keys():
-                    linked_pages[page] = 0.85/len(linked_pages) + 0.15/len(self.title_to_id)
+
+            self.populate_weights(pid, page_info)
+
+    def calc_relevance(self, word_info, page_info):
+        """converts the values of word_info from word count numbers into term
+        relevance scores by calculating tf and idf scores and multiplying"""
+        for word in word_info.keys():
+            # convert n_i to inverse document frequency scores
+            n_i = word_info[word][0]
+            idf = math.log(len(self.title_to_id)/n_i)
+            word_info[word][0] = idf
+
+            # convert word counts to term frequency scores
+            word_counts = word_info[word][1]
+            for pid in word_counts.keys():
+                wc = word_counts[pid]
+                max_freq = page_info[pid][0]
+                tf = wc/max_freq
+                word_counts[pid] = tf * idf
 
     def make_corpus(self, pages : list):
         """takes in xml pages and populates global variable corpus"""        
@@ -280,7 +307,7 @@ class Indexer:
 
         return math.sqrt(sum)
 
-    def make_scores(self, ii: IndexInfo) -> list:
+    def make_scores(self, ii: IndexInfo):
         """converts an IndexInfo into a relevance scores array"""
         rel = []
         for r in self.make_tf_array(ii):
