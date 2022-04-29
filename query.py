@@ -46,6 +46,8 @@ class Query:
     def retrieve_results(self, words: list) -> list:
         """takes in list of processed words and returns a list of page titles"""
         ids_to_titles = {}
+        read_title_file(self.title_file, ids_to_titles)
+
         words_to_relevance_dict = {}
         read_words_file(self.words_file, words_to_relevance_dict)
 
@@ -58,18 +60,17 @@ class Query:
             if word in words_to_relevance_dict:
                 for kvpair in words_to_relevance_dict[word].items():
                     if kvpair[0] not in ids_to_total_relevance:
-                        #ids_to_total_relevance[kvpair[0]] = kvpair[1]
                         ids_to_total_relevance[kvpair[0]] = self.calc_score(ids_to_pagerank[kvpair[0]], kvpair[1])
                     else:
-                        #ids_to_total_relevance[kvpair[0]] += kvpair[1]
                         ids_to_total_relevance[kvpair[0]] += self.calc_score(ids_to_pagerank[kvpair[0]], kvpair[1]) 
         
         sorted_ids = sorted(ids_to_total_relevance.items(), key=lambda x: x[1], reverse=True)
+        print(sorted_ids)
+        print()
         results = []
         num_results = len(sorted_ids)
         num_results_to_return = min(10, num_results)
         for i in range(num_results_to_return):
-            print(i)
             results.append(ids_to_titles[sorted_ids[i][0]])
         return results
 
