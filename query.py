@@ -5,11 +5,6 @@ from nltk.stem import PorterStemmer
 from ctypes import ArgumentError
 from file_io import *
 
-# class PageRelevance:
-#     def __init__(self, key, value):
-#         self.page_id = key
-#         self.relevance = value
-
 class Query:
     def __init__(self, args):
         self.pagerank = False
@@ -95,7 +90,6 @@ class Query:
         
         for idx, result in enumerate(results):
             print(str(idx + 1) + " " + result)
-
 
 if __name__ == "__main__":
     q = Query(sys.argv[1:])
