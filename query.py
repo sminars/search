@@ -22,7 +22,6 @@ class Query:
         if len(args) == 4 and args[0] == '--pagerank':
             # do pagerank
             self.pagerank = True
-            print("hi")
             file_list = args[1:]
         elif len(args) == 3:
             # we don't do pagerank
@@ -45,21 +44,17 @@ class Query:
 
     def retrieve_results(self, words: list) -> list:
         """takes in list of processed words and returns a list of page titles"""
-        print("Reading in titles...")
         ids_to_titles = {}
         read_title_file(self.title_file, ids_to_titles)
 
-        print("Reading in words...")  # this is where query is taking the most time
         words_to_relevance_dict = {}
         read_words_file(self.words_file, words_to_relevance_dict)
 
-        print("Reading in docs...")
         ids_to_pagerank = {}
         read_docs_file(self.docs_file, ids_to_pagerank)
 
         ids_to_total_relevance = {}
-       
-        print("Looking up values...")
+
         for word in words:
             if word in words_to_relevance_dict:
                 for kvpair in words_to_relevance_dict[word].items():
@@ -68,8 +63,6 @@ class Query:
                     else:
                         ids_to_total_relevance[kvpair[0]] += self.calc_score(ids_to_pagerank[kvpair[0]], kvpair[1]) 
         
-        print("Sorting...")  # this is also taking longer than it should. 
-        # maybe try storing results in a heap or some other sorted thing as we go?
         sorted_ids = sorted(ids_to_total_relevance.items(), key=lambda x: x[1], reverse=True)
         results = []
         num_results = len(sorted_ids)
@@ -78,24 +71,8 @@ class Query:
             results.append(ids_to_titles[sorted_ids[i][0]])
         return results
 
-    def process_arguments(self, args):
-        """returns a list of [title file, docs file, words file] if command
-        line arguments are valid, otherwise raises an exception"""
-        file_list = []
-        if len(args) == 4 and args[0] == '--pagerank':
-            # do pagerank
-            file_list = args[1:]
-        elif len(args) == 3:
-            # we don't do pagerank
-            file_list = args
-        else:
-            raise ArgumentError("Invalid command line arguments, try again.")
-
-        return file_list
-
     def processed_search_terms(self, search_terms: str) -> list:
         """blah"""
-        print("Processing search terms...")
         n_regex = '''\[\[[^\[]+?\]\]|[a-zA-Z0-9]+'[a-zA-Z0-9]+|[a-zA-Z0-9]+'''
         STOP_WORDS = set(stopwords.words('english'))
         stemmer = PorterStemmer()
@@ -107,11 +84,6 @@ class Query:
                 processed_words.append(stemmer.stem(wrd.lower()))
 
         return processed_words
-
-         
-        # want a structure that can be ordered, and that for each element, it
-        # has the page id and the relevance score bundled together, but mutable
-
 
     def print_results(self, search_terms: str):
         """passes the query into helper methods and prints the top results (max
