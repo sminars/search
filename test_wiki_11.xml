@@ -2,27 +2,27 @@
     <page>
         <title>Oranges</title>
         <id>1</id>
-        <text>Many people make orange juice.</text>
+        <text>Many people build orange juice.</text>
     </page>
     <page>
         <title>New York City</title>
         <id>2</id>
-        <text>NYC has many [[Skyscrapers|tall buildings.]]</text>
+        <text>NYC has many [[Skyscrapers|tall buildings]] that get build.</text>
     </page>
     <page>
         <title>Blood Oranges</title>
         <id>3</id>
-        <text>Blood oranges are a type of [[Oranges|orange.]] We just love [[oranges]].</text>
+        <text>Blood oranges are a type of [[Oranges|orange.]] We just love to build [[oranges]].</text>
     </page>
     <page>
         <title>New Haven</title>
         <id>4</id>
-        <text>Many people live here and commute to [[New York]].  There are no [[skyscrapers]] here.</text>
+        <text>Many people live here and commute to [[New York]].  No one has build [[skyscrapers]] here.</text>
     </page>
     <page>
         <title>Aluminum Foil</title>
         <id>5</id>
-        <text>Used in kitchens, made out of [[aluminum]].</text>
+        <text>Used in kitchens, build out of [[aluminum]].</text>
     </page>
     <page>
         <title>Skyscrapers</title>
@@ -32,26 +32,26 @@
     <page>
         <title>Billiards</title>
         <id>7</id>
-        <text>Popular [[Category:Sport]] in England.</text>
+        <text>Popular [[Category:Sport]] build in England.</text>
     </page>
     <page>
         <title>Dogs</title>
         <id>8</id>
-        <text>Not like [[cats]].</text>
+        <text>Not build like [[cats]].</text>
     </page>
     <page>
         <title>Cats</title>
         <id>9</id>
-        <text>Superior animals.</text>
+        <text>Superiorly build animals.</text>
     </page>
     <page>
         <title>Frogs</title>
         <id>10</id>
-        <text>Classified as  [[Category:Amphibians]], may turn into a prince.</text>
+        <text>Classified as  [[Category:Amphibians]], may build into a prince.</text>
     </page>
     <page>
         <title>Prince</title>
         <id>11</id>
-        <text>Purple Rain</text>
+        <text>Purple Rain, build in the 80s</text>
     </page>
 </xml>
