@@ -6,13 +6,32 @@ from ctypes import ArgumentError
 from file_io import *
 
 class Query:
+    """
+    Class that parses in arguments of the previously indexed files and an optional
+    argument that says to use PageRank. Also, runs a REPL to take in and process 
+    search queries submitted by users. For valid queries, returns a list of the 
+    top ten documents scored based on term relevance and PageRank if specified.
+    """
     def __init__(self, args):
         self.pagerank = False
         self.title_file, self.docs_file, self.words_file = self.process_arguments(args)  
        
     def process_arguments(self, args):
-        """returns a list of [title file, docs file, words file] if command
-        line arguments are valid, otherwise raises an exception"""
+        """Returns a list of [title file, docs file, words file] if command
+        line arguments are valid, otherwise raises an exception. If the 
+        PageRank argument is specified, the value of the boolean variable
+        pagerank is set to True.
+        
+        Parameters:
+        args -- list of command line arguments 
+
+        Returns:
+        A list of title file, docs file, and words file
+
+        Throws:
+        ArgumentError if the command line arguments are invalid 
+        """
+       
         file_list = []
         if len(args) == 4 and args[0] == '--pagerank':
             # do pagerank
@@ -28,8 +47,17 @@ class Query:
  
 
     def calc_score(self, pagerank_score, rel_score) -> float:
-        """returns combination of pagerank score and relevance score if pagerank
-        is specified, otherwise returns just relevance score"""
+        """Calculates score by multiplying the pagerank score times the relevance 
+        score if PageRank is specified, otherwise returns just the relevance
+        score.
+      
+        Parameters:
+        pagerank_score -- pagerank score
+        rel_score -- relevance score
+
+        Returns:
+        A float (document score)
+        """
 
         if self.pagerank:
             return pagerank_score * rel_score
@@ -38,7 +66,15 @@ class Query:
            
 
     def retrieve_results(self, words: list) -> list:
-        """takes in list of processed words and returns a list of page titles"""
+        """Uses proccesed words from search query to calculate document score to return a 
+        list of the top, maximum of ten, documents 
+
+        Parameters:
+        words -- list of proccessed words from search query 
+
+        Returns:
+        A list of page titles corresponding to the top ten highest scoring documents
+        """
         ids_to_titles = {}
         read_title_file(self.title_file, ids_to_titles)
 
@@ -67,7 +103,14 @@ class Query:
         return results
 
     def processed_search_terms(self, search_terms: str) -> list:
-        """blah"""
+        """Processes query inputted by users through tokenizing, removing stop words, and stemming
+       
+        Parameters:
+        search_terms -- str inputted by user 
+
+        Returns:
+        A list of processed words 
+        """
         n_regex = '''\[\[[^\[]+?\]\]|[a-zA-Z0-9]+'[a-zA-Z0-9]+|[a-zA-Z0-9]+'''
         STOP_WORDS = set(stopwords.words('english'))
         stemmer = PorterStemmer()
@@ -81,8 +124,17 @@ class Query:
         return processed_words
 
     def print_results(self, search_terms: str):
-        """passes the query into helper methods and prints the top results (max
-        of 10), or an informative message if no results"""
+        """Passes the user query into helper methods to print the top results (max
+        of ten), or an informative message if no results
+
+        Parameters:
+        search_terms -- str inputted by user 
+
+        Returns:
+        Prints list of page titles corresponding to the top (max ten) documents
+        or a message if the query returns no results
+        
+        """
         results = self.retrieve_results(self.processed_search_terms(search_terms))
 
         if not results:
@@ -92,6 +144,10 @@ class Query:
             print(str(idx + 1) + " " + result)
 
 if __name__ == "__main__":
+    """
+    Sets up REPL interface for users to search documents.
+    Instantiates a Query object to process the queries submitted by user. 
+    """
     q = Query(sys.argv[1:])
 
     while True is True:
