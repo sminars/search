@@ -7,9 +7,7 @@ def test_word_processing():
     """ensure that Indexer adds the words to the corpus that we'd expect"""
     args = ["small_test_wiki.xml", "title_file.txt", "docs_file.txt", "words_file.txt"]
     ind = Indexer(args)
-    word_info = {}
-    page_info = {}
-    ind.process_pages(ind.get_pages(args[0])[0], word_info, page_info)
+    word_info = ind.process_pages(ind.get_pages(args[0])[0])[0]
 
     expected_corpus = ['juic', 'york', 'blood', 'love', 'mani', 'sport', 
                         'england', 'build', 'popular', 'kitchen', 'peopl', 
@@ -35,8 +33,7 @@ def test_relevance():
         'citi': {2: math.log(2), 3: math.log(2)/2},
         'blue': {2: math.log(2), 4: math.log(2)}
     }
-    words_to_relevance = {}  
-    ind_test_idf.calc_relevance(ind_test_idf.get_pages(args[0])[0], words_to_relevance, {})
+    words_to_relevance = ind_test_idf.calc_relevance(ind_test_idf.get_pages(args[0])[0])[0]
 
     for word in expected_wtr.keys():
         for pid in expected_wtr[word].keys():
@@ -70,10 +67,13 @@ def test_weights():
     args = ["test_weights_wiki.xml", "title_file.txt", "docs_file.txt", "words_file.txt"]
     ind_w = Indexer(args)
     page_info = {}
-    ind_w.calc_relevance(ind_w.get_pages(args[0])[0], {}, page_info)
+    page_info = ind_w.calc_relevance(ind_w.get_pages(args[0])[0])[1]
     for r in range(4):
         for c in range(4):
-            assert ind_w.calc_weight(r+1, c+1, page_info) == pytest.approx(expected_weights[r][c])
+            print(str(r) + " " + str(c))
+            print(ind_w.num_pages)
+            print(page_info)
+            assert ind_w.calc_weight(r+1, c+1, page_info[r+1].links) == pytest.approx(expected_weights[r][c])
 
 def test_ranks_ex1():
     """tests a wiki where first page has 2 links, second page has no links, and third page has pipe link"""
