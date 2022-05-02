@@ -38,6 +38,8 @@ class Indexer:
     def __init__(self, args: list):
         if len(args) != 4:
             raise ArgumentError
+        if len(args[0]) < 4 or args[0][-4:] != '.xml':
+            raise ArgumentError
         for arg in args[1:]:
             if len(arg) < 4 or arg[-4:] != '.txt':
                 raise ArgumentError
@@ -229,8 +231,11 @@ class Indexer:
             p_info = PageInfo(0, set())  
             page_info[pid] = p_info
 
-            page_elems = re.findall(self.n_regex, page.find('title').text + 
-                        " " + page.find('text').text)
+            page_elems = []
+            pg_title = page.find('title').text
+            pg_text = page.find('text').text
+            if pg_title and pg_text:  # avoids empty titles or empty texts
+                page_elems = re.findall(self.n_regex, pg_title + " " + pg_text)
             for elem in page_elems:
                 if re.match('\[\[[^\[]+?\]\]', elem):  # if elem is a link
                     self.handle_link(pid, elem[2:-2], word_info, p_info)
@@ -365,5 +370,5 @@ if __name__ == "__main__":
             + " <title-file>.txt <docs-file>.txt <words-file>.txt")
     except FileNotFoundError:
         print(sys.argv[1] + " not found. Try again.")
-    except et.ParseError:
-        print(sys.argv[1] + " is an invalid XML file. Try again.")
+    # except et.ParseError:
+    #     print(sys.argv[1] + " is an invalid XML file. Try again.")

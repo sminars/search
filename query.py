@@ -7,17 +7,17 @@ from file_io import *
 
 class Query:
     """
-    Class that parses in arguments of the previously indexed files and an optional
-    argument that says to use PageRank. Also, runs a REPL to take in and process 
-    search queries submitted by users. For valid queries, returns a list of the 
-    top ten documents scored based on term relevance and PageRank if specified.
+    Class that parses in arguments of the previously indexed files and an 
+    optional argument that says to use PageRank. Also, runs a REPL to take in 
+    and process search queries submitted by users. For valid queries, returns a 
+    list of the top 10 documents by term relevance (and PageRank, if specified).
     """
     def __init__(self, args):
         self.pagerank = False
-        self.title_file, self.docs_file, self.words_file = self.process_arguments(args)  
+        self.titles, self.docs, self.words =  self.process_arguments(args)
        
     def process_arguments(self, args):
-        """Returns a list of [title file, docs file, words file] if command
+        """Returns a tuple of (title file, docs file, words file) if command
         line arguments are valid, otherwise raises an exception. If the 
         PageRank argument is specified, the value of the boolean variable
         pagerank is set to True.
@@ -26,7 +26,7 @@ class Query:
         args -- list of command line arguments 
 
         Returns:
-        A list of title file, docs file, and words file
+        A tuple of title file, docs file, and words file
 
         Throws:
         ArgumentError if the command line arguments are invalid 
@@ -44,12 +44,10 @@ class Query:
             raise ArgumentError("Invalid command line arguments, try again.")
 
         return file_list
- 
 
     def calc_score(self, pagerank_score, rel_score) -> float:
-        """Calculates score by multiplying the pagerank score times the relevance 
-        score if PageRank is specified, otherwise returns just the relevance
-        score.
+        """Calculates score by multiplying the pagerank score by the relevance 
+        score if PageRank is specified, otherwise just the relevance score.
       
         Parameters:
         pagerank_score -- pagerank score
@@ -62,39 +60,41 @@ class Query:
         if self.pagerank:
             return pagerank_score * rel_score
         else:
-            return rel_score
-           
+            return rel_score       
 
     def retrieve_results(self, words: list) -> list:
-        """Uses proccesed words from search query to calculate document score to return a 
-        list of the top, maximum of ten, documents 
+        """Uses proccesed words from search query to calculate document score to
+        return a list of the top, maximum of ten, documents 
 
         Parameters:
         words -- list of proccessed words from search query 
 
         Returns:
-        A list of page titles corresponding to the top ten highest scoring documents
+        A list of page titles corresponding to the highest scoring documents
         """
         ids_to_titles = {}
-        read_title_file(self.title_file, ids_to_titles)
+        read_title_file(self.titles, ids_to_titles)
 
-        words_to_relevance_dict = {}
-        read_words_file(self.words_file, words_to_relevance_dict)
+        words_to_relevance = {}
+        read_words_file(self.words, words_to_relevance)
 
         ids_to_pagerank = {}
-        read_docs_file(self.docs_file, ids_to_pagerank)
+        read_docs_file(self.docs, ids_to_pagerank)
 
-        ids_to_total_relevance = {}
+        ids_to_total_score = {}
 
         for word in words:
-            if word in words_to_relevance_dict:
-                for kvpair in words_to_relevance_dict[word].items():
-                    if kvpair[0] not in ids_to_total_relevance:
-                        ids_to_total_relevance[kvpair[0]] = self.calc_score(ids_to_pagerank[kvpair[0]], kvpair[1])
+            if word in words_to_relevance:
+                for pid in words_to_relevance[word].keys():
+                    rel = words_to_relevance[word][pid]
+                    rnk = ids_to_pagerank[pid]
+                    if pid not in ids_to_total_score:
+                        ids_to_total_score[pid] = self.calc_score(rnk, rel)
                     else:
-                        ids_to_total_relevance[kvpair[0]] += self.calc_score(ids_to_pagerank[kvpair[0]], kvpair[1]) 
+                        ids_to_total_score[pid] += self.calc_score(rnk, rel) 
         
-        sorted_ids = sorted(ids_to_total_relevance.items(), key=lambda x: x[1], reverse=True)
+        sorted_ids = sorted(ids_to_total_score.items(), key=lambda x: x[1], 
+                    reverse=True)  # sort in descending order by score
         results = []
         num_results = len(sorted_ids)
         num_results_to_return = min(10, num_results)
@@ -102,8 +102,9 @@ class Query:
             results.append(ids_to_titles[sorted_ids[i][0]])
         return results
 
-    def processed_search_terms(self, search_terms: str) -> list:
-        """Processes query inputted by users through tokenizing, removing stop words, and stemming
+    def processed_terms(self, search_terms: str) -> list:
+        """Processes query inputted by users through tokenizing, removing stop 
+        words, and stemming.
        
         Parameters:
         search_terms -- str inputted by user 
@@ -124,18 +125,19 @@ class Query:
         return processed_words
 
     def print_results(self, search_terms: str):
-        """Passes the user query into helper methods to print the top results (max
-        of ten), or an informative message if no results
+        """Passes the user query into helper methods to print the top results 
+        (maximum of ten), or an informative message if there are no results.
 
         Parameters:
-        search_terms -- str inputted by user 
+        search_terms -- user-input string of search terms 
 
         Returns:
         Prints list of page titles corresponding to the top (max ten) documents
         or a message if the query returns no results
         
         """
-        results = self.retrieve_results(self.processed_search_terms(search_terms))
+        processed_terms = self.processed_terms(search_terms)
+        results = self.retrieve_results(processed_terms)
 
         if not results:
             print("No results for that search.")
@@ -150,7 +152,7 @@ if __name__ == "__main__":
     """
     q = Query(sys.argv[1:])
 
-    while True is True:
+    while True is True:  # continue until break statement is reached
         response = input("Search for pages here: ")
         if response == ':quit':
             break
