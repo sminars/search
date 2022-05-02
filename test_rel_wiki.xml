@@ -1,0 +1,27 @@
+<xml>
+    <page>
+        <title>Oranges</title>
+        <id>1</id>
+        <text>Many people make orange juice.</text>
+    </page>
+    <page>
+        <title>New York City</title>
+        <id>2</id>
+        <text>NYC has many [[Skyscrapers|buildings.]]</text>
+    </page>
+    <page>
+        <title>Blood Oranges</title>
+        <id>3</id>
+        <text> [[Oranges|orange.]]</text>
+    </page>
+     <page>
+        <title>Orange</title>
+        <id>4</id>
+        <text>[[aluminum]]</text>
+    </page>
+    <page>
+        <title>NYC</title>
+        <id>5</id>
+        <text>[[Category:Building]] </text>
+    </page>
+</xml>

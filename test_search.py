@@ -24,7 +24,7 @@ def test_arguments():
         Indexer(["1", "2", "3"])
         Indexer(["1", "2", "3", "4", "5"])
 
-def test_relevance():
+def test_relevance1():
     args = ["test_idf_wiki.xml", "title_file.txt", "docs_file.txt", "words_file.txt"]
     ind_test_idf = Indexer(args)
     expected_wtr = {
@@ -33,11 +33,39 @@ def test_relevance():
         'citi': {2: math.log(2), 3: math.log(2)/2},
         'blue': {2: math.log(2), 4: math.log(2)}
     }
+    # calculating words_to_relevance dict 
     words_to_relevance = ind_test_idf.calc_relevance(ind_test_idf.get_pages(args[0])[0])[0]
 
     for word in expected_wtr.keys():
         for pid in expected_wtr[word].keys():
                 assert words_to_relevance[word][pid] == expected_wtr[word][pid]
+
+def test_revelance2():
+    # testing a slightly larger wiki with every type of link, address of link page is not included in word count 
+    args = ["test_rel_wiki.xml", "title_file.txt", "docs_file.txt", "words_file.txt"]
+    ind = Indexer(args)
+    expected_wtr = {
+       'orang': {1: math.log(5/3), 3: math.log(5/3), 4: math.log(5/3)}, # orange appears in multiple documents in high numbers
+       'mani': {1: .5*math.log(5/2), 2: math.log(5/2)},
+       'peopl': {1: .5*math.log(5)},
+       'make': {1: .5*math.log(5)},
+       'juic': {1: .5*math.log(5)},
+       'new': {2: math.log(5)},
+       'york': {2: math.log(5)},
+       'citi': {2: math.log(5)},
+       'nyc': {2: math.log(5/2), 5: math.log(5/2)},
+       'build': {2: math.log(5/2), 5: math.log(5/2)},
+       'blood': {3: (1/2)*math.log(5)}, 
+       'aluminum': {4: math.log(5)},
+       'categori': {5: math.log(5)}
+    }
+    # calculating words_to_relevance dict 
+    words_to_relevance = ind.calc_relevance(ind.get_pages(args[0])[0])[0]
+
+    for word in expected_wtr.keys():
+        for pid in expected_wtr[word].keys():
+            assert words_to_relevance[word][pid] == expected_wtr[word][pid]
+
 
 def test_querier():
     args = ["test_idf_wiki.xml", "title_file.txt", "docs_file.txt", "words_file.txt"]
@@ -113,7 +141,7 @@ def test_ranks_ex4():
     for i in range(len(expected)):
         sum += list(ids_to_pageranks.values())[i]
         assert list(ids_to_pageranks.values())[i] == pytest.approx(expected[i], abs = .0001)
-    assert sum == pytest.approx(1)
+    assert sum == pytest.approx(1) # testing the sum of pagerank scores equals 1
 
 def test_ranks_100():
     ind = Indexer(["PageRankWiki.xml", "title_file.txt", "docs_file.txt", "words_file.txt"])
@@ -124,7 +152,7 @@ def test_ranks_100():
     sum = 0
     for rank in ids_to_pageranks.values():
         sum += rank
-    assert sum == pytest.approx(1)
+    assert sum == pytest.approx(1) # testing the sum of pagerank scores equals 1
 
 
 
