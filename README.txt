@@ -84,6 +84,34 @@ Examples of system tests include testing various queries and pasting the results
 
 # --------------- Error catching --------------------------
 
+These tests demonstrate that both the indexer and the querier handle 
+misspellings of file names, incorrect file types, and invalid sets of arguments 
+(including commands with the right number of arguments but the wrong types) by 
+printing out informative messages rather than crashing the program.
+
+>> python index.py test_pr_wiki.xml title_file.txt docs_file.txt words_file.tx
+Try again. Must include the following 4 arguments: 
+<pages-file>.xml <title-file>.txt <docs-file>.txt <words-file>.txt
+
+>> python index.py test_pr_wiki.ml title_file.txt docs_file.txt words_file.txt 
+Try again. Must include the following 4 arguments: 
+<pages-file>.xml <title-file>.txt <docs-file>.txt <words-file>.txt
+
+>> python index.py test_pr_wiki.xml title_file.txt docs_file.txt words_file.txt README.txt
+Try again. Must include the following 4 arguments: 
+<pages-file>.xml <title-file>.txt <docs-file>.txt <words-file>.txt
+
+>> python index.py test_pr_wiki.xml title_file.txt docs_file.txt           
+Try again. Must include the following 4 arguments: 
+<pages-file>.xml <title-file>.txt <docs-file>.txt <words-file>.txt
+
+>> python index.py title_file.txt title_file.txt docs_file.txt words_file.txt 
+Try again. Must include the following 4 arguments: 
+<pages-file>.xml <title-file>.txt <docs-file>.txt <words-file>.txt
+
+>> python index.py missing.xml title_file.txt docs_file.txt words_file.txt 
+missing.xml not found. Try again.
+
 >> python query.py --pagerank title_file.txt docs_file.txt words_file.tx
 File not found -- try again.
 
@@ -107,11 +135,11 @@ Invalid command line arguments, try again.  Arguments must take the form:
     --pagerank <title-file>.txt <docs-file>.txt <words-file>.txt
 where --pagerank is an optional argument.
 
-These tests demonstrate that the querier handles both misspellings of file names
-and invalid sets of arguments (including commands with the right number of 
-arguments but the wrong types) by printing out informative messages.
+# ---------- Handling searches with no results -----------------
 
-# -------------- Handling no results ---------------------
+These tests confirm that the search engine correctly handles stop words, empty 
+strings, spaces & quote marks, and words not in the corpus by not indexing those
+things and by printing out an informative message when they are searched for.
 
 >> python index.py BigWiki.xml title_file.txt docs_file.txt words_file.txt
 File successfully indexed!
@@ -128,11 +156,12 @@ No results for that search.
 Search for pages here: hgoihnj
 No results for that search.
 
-These tests confirm that the search engine correctly handles stop words, empty 
-strings, spaces & quote marks, and words not in the corpus by not indexing those
-things and by printing out an informative message when they are searched for.
-
 # -------------- testing pagerank's influence -------------
+
+We set up test_pr_wiki such that the word "tall" appears more frequently on the 
+New York City page, but that Skyscrapers is linked more by other pages.  This
+test confirms that using pagerank or not changes which of those two pages is 
+listed first in the search results for the word "tall".
 
 >> python index.py test_pr_wiki.xml title_file.txt docs_file.txt words_file.txt
 File successfully indexed!
@@ -147,12 +176,14 @@ Search for pages here: tall
 1 Skyscrapers
 2 New York City
 
-We set up test_pr_wiki such that the word "tall" appears more frequently on the 
-New York City page, but that Skyscrapers is linked more by other pages.  This
-test confirms that using pagerank or not changes which of those two pages is 
-listed first in the search results for the word "tall".
-
 # --------------- BigWiki.xml examples --------------------
+
+In both of these examples from BigWiki, the non-pagerank results tend to be more 
+obscure pages (FSF, Front line, Irredentism, Laura Bertram, Four-poster) while 
+results with pagerank factored in tend to be pages on more well-known topics, 
+which we can reasonably assume will have more links to them and thus higher 
+PageRank scores.  This helped us confirm that our overall implementation of 
+PageRank is working as intended in both the indexing and querying components.
 
 >> python index.py BigWiki.xml title_file.txt docs_file.txt words_file.txt
 File successfully indexed!
@@ -213,14 +244,11 @@ Search for pages here: dark ages
 9 Germanic peoples
 10 Indo-European languages
 
-In both of these examples from BigWiki, the non-pagerank results tend to be more 
-obscure pages (FSF, Front line, Irredentism, Laura Bertram, Four-poster) while 
-results with pagerank factored in tend to be pages on more well-known topics, 
-which we can reasonably assume will have more links to them and thus higher 
-PageRank scores.  This helped us confirm that our overall implementation of 
-PageRank is working as intended in both the indexing and querying components.
-
 # ----------- Selected MedWiki.xml TA examples --------
+
+These examples of searches in MedWiki.xml closely match the TA examples, further
+confirming that our algorithms prioritize pages correctly for both term
+relevance only and with PageRank factored in.
 
 >> python index.py MedWiki.xml title_file.txt docs_file.txt words_file.txt
 File successfully indexed!
@@ -280,7 +308,3 @@ Search for pages here: United States
 8 Pennsylvania
 9 Norway
 10 Louisiana
-
-These examples of searches in MedWiki.xml closely match the TA examples, further
-confirming that our algorithms prioritize pages correctly for both term
-relevance only and with PageRank factored in.

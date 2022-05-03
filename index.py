@@ -366,9 +366,7 @@ if __name__ == "__main__":
         idxr = Indexer(sys.argv[1:])
         print("File successfully indexed!")
     except ArgumentError:
-        print("Try again. Must include 4 arguments of the form <pages-file>.xml"
-            + " <title-file>.txt <docs-file>.txt <words-file>.txt")
+        print("Try again. Must include the following 4 arguments: \n<pages-file"
+            + ">.xml <title-file>.txt <docs-file>.txt <words-file>.txt")
     except FileNotFoundError:
         print(sys.argv[1] + " not found. Try again.")
-    # except et.ParseError:
-    #     print(sys.argv[1] + " is an invalid XML file. Try again.")
