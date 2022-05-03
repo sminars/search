@@ -36,8 +36,11 @@ def test_arguments():
     we just test that the exceptions are thrown.
     """
     with pytest.raises(ArgumentError):
-        Indexer(["1", "2", "3"]) # 3 arguments - must have 4
-        Indexer(["1", "2", "3", "4", "5"]) # 5 arguments - must have 4
+        Indexer(["1", "2", "3"]) # must have 4 arguments
+        Indexer(["1", "2", "3", "4", "5"]) # must have 4 arguments
+        Query(["1", "2"]) # must have 3 or 4 arguments
+        Query(["1", "2", "3", "4", "5"]) # must have 3 or 4 arguments
+        Query(["1", "2", "3", "4"]) # if 4 arguments, first must be --pagerank
 
         # the first argument must end in .xml
         Indexer(["index.py", "title_file.txt", "doc_file.txt", "word_file.txt"])
@@ -47,6 +50,10 @@ def test_arguments():
 
     with pytest.raises(FileNotFoundError):  # only if the xml file isn't found
         Indexer(["p.xml", "title_file.txt", "docs_file.txt", "words_file.txt"])
+        Query(["title_file.txt", "docs_file.txt", "3"])
+        Query(["--pagerank", "title_file.txt", "docs_file.txt", "3"])
+        Query(["--pagerank", "title_file.txt", "docs_file.txt"])
+
 
 def test_empty_wiki():
     """

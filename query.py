@@ -14,7 +14,16 @@ class Query:
     """
     def __init__(self, args):
         self.pagerank = False
-        self.titles, self.docs, self.words =  self.process_arguments(args)
+        self.t_file, self.d_file, self.w_file =  self.process_arguments(args)
+
+        self.ids_to_titles = {}
+        read_title_file(self.t_file, self.ids_to_titles)
+
+        self.words_to_relevance = {}
+        read_words_file(self.w_file, self.words_to_relevance)
+
+        self.ids_to_pagerank = {}
+        read_docs_file(self.d_file, self.ids_to_pagerank)
        
     def process_arguments(self, args):
         """Returns a tuple of (title file, docs file, words file) if command
@@ -41,7 +50,7 @@ class Query:
             # we don't do pagerank
            file_list = args
         else:
-            raise ArgumentError("Invalid command line arguments, try again.")
+            raise ArgumentError
 
         return file_list
 
@@ -72,22 +81,14 @@ class Query:
         Returns:
         A list of page titles corresponding to the highest scoring documents
         """
-        ids_to_titles = {}
-        read_title_file(self.titles, ids_to_titles)
-
-        words_to_relevance = {}
-        read_words_file(self.words, words_to_relevance)
-
-        ids_to_pagerank = {}
-        read_docs_file(self.docs, ids_to_pagerank)
 
         ids_to_total_score = {}
 
         for word in words:
-            if word in words_to_relevance:
-                for pid in words_to_relevance[word].keys():
-                    rel = words_to_relevance[word][pid]
-                    rnk = ids_to_pagerank[pid]
+            if word in self.words_to_relevance:
+                for pid in self.words_to_relevance[word].keys():
+                    rel = self.words_to_relevance[word][pid]
+                    rnk = self.ids_to_pagerank[pid]
                     if pid not in ids_to_total_score:
                         ids_to_total_score[pid] = self.calc_score(rnk, rel)
                     else:
@@ -99,7 +100,7 @@ class Query:
         num_results = len(sorted_ids)
         num_results_to_return = min(10, num_results)
         for i in range(num_results_to_return):
-            results.append(ids_to_titles[sorted_ids[i][0]])
+            results.append(self.ids_to_titles[sorted_ids[i][0]])
         return results
 
     def processed_terms(self, search_terms: str) -> list:
@@ -150,7 +151,13 @@ if __name__ == "__main__":
     Sets up REPL interface for users to search documents.
     Instantiates a Query object to process the queries submitted by user. 
     """
-    q = Query(sys.argv[1:])
+    try:
+        q = Query(sys.argv[1:])
+    except FileNotFoundError:
+        print("File not found -- try again.")
+    except ArgumentError:
+        print("Invalid command line arguments, try again.  Arguments must take"
+        + " the form <title-file>.txt <docs-file>.txt <words-file>.txt")
 
     while True is True:  # continue until break statement is reached
         response = input("Search for pages here: ")
