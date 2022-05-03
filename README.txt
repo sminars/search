@@ -1,6 +1,6 @@
 Ethan McIntosh and Samantha Minars
 
-### Background and instructions for use
+# ------------ Background and instructions for use ----------------------
 
 Our search engine is built around two classes - an Indexer (index.py) and a 
 Query (query.py).  The Indexer counts and scores words within a corpus of XML
@@ -32,7 +32,7 @@ Running query.py will yield an input dialog box on the user's Python console,
 where users can enter search terms and see the titles of the top 10 results for
 each query.  To exit the querier, users can type :quit into the dialog box.  
 
-### How the search engine works
+# ---------------- How the search engine works --------------------------
 
 Calculating term relevance and PageRank scores requires a significant number of
 intermediate computations using information about words and pages that can only
@@ -77,7 +77,7 @@ the query, a message indicating the lack of results will be printed.
 Both the indexer and the querier handle misspelled file names or invalid sets of
 command-line arguments using try-except blocks that print out useful messages.  
 
-### Testing the search engine
+# ------------------ Testing the search engine -------------------------------
 description of how you tested your program, and ALL of your system tests
 
 Examples of system tests include testing various queries and pasting the results.
