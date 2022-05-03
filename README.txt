@@ -78,9 +78,25 @@ Both the indexer and the querier handle misspelled file names or invalid sets of
 command-line arguments using try-except blocks that print out useful messages.  
 
 # ------------------ Testing the search engine -------------------------------
-description of how you tested your program, and ALL of your system tests
+Our unit tests (all located in test_search.py) consist of 11 methods, which are
+described below:
 
-Examples of system tests include testing various queries and pasting the results.
+- test_word_processing(): tested the word tokenizing, stemming, and stop word
+removal by checking expected and actual corpus on a small wiki
+- test_arguments(): tests that indexer and querier raise appropriate errors for
+files not found and improper sets of command line arguments
+- test_empty_wiki(): ensures that program doesn't crash with empty wiki text
+- test_relevance1() and test_relevance2(): test expected and actual relevance 
+score calculations for two wikis with slightly different setups
+- test_querier(): tests that the querier returns expected numbers and values of
+results for various scenarios
+- test_weights(): tests that weights for PageRank are calculated correctly for a
+wiki with various types and numbers of links.  
+- test_ranks_ex1() through test_ranks_ex4() and test_ranks_100(): tests that 
+expected and actual PageRank scores match for wikis that involve different kinds
+and numbers of links
+
+Below are a series of system tests we performed.  
 
 # --------------- Error catching --------------------------
 

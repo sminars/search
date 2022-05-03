@@ -243,7 +243,8 @@ def test_ranks_ex4():
     sum = 0
     for i in range(len(expected)):
         sum += list(ids_to_pageranks.values())[i]
-        assert list(ids_to_pageranks.values())[i] == pytest.approx(expected[i], abs = .0001)
+        assert list(ids_to_pageranks.values())[i] == \
+            pytest.approx(expected[i], abs = .0001)
     assert sum == pytest.approx(1) # testing the sum of pagerank scores equals 1
 
 def test_ranks_100():
