@@ -81,3 +81,206 @@ command-line arguments using try-except blocks that print out useful messages.
 description of how you tested your program, and ALL of your system tests
 
 Examples of system tests include testing various queries and pasting the results.
+
+# --------------- Error catching --------------------------
+
+>> python query.py --pagerank title_file.txt docs_file.txt words_file.tx
+File not found -- try again.
+
+>> python query.py --pagerak title_file.txt docs_file.txt words_file.txt
+Invalid command line arguments, try again.  Arguments must take the form: 
+    --pagerank <title-file>.txt <docs-file>.txt <words-file>.txt
+where --pagerank is an optional argument.
+
+>> python query.py --pagerank title_file.txt docs_file.txt
+Invalid command line arguments, try again.  Arguments must take the form: 
+    --pagerank <title-file>.txt <docs-file>.txt <words-file>.txt
+where --pagerank is an optional argument.
+
+>> python query.py title_file.txt docs_file.txt                            
+Invalid command line arguments, try again.  Arguments must take the form: 
+    --pagerank <title-file>.txt <docs-file>.txt <words-file>.txt
+where --pagerank is an optional argument.
+
+>> python query.py title_file.txt docs_file.txt words_file.txt README.txt
+Invalid command line arguments, try again.  Arguments must take the form: 
+    --pagerank <title-file>.txt <docs-file>.txt <words-file>.txt
+where --pagerank is an optional argument.
+
+These tests demonstrate that the querier handles both misspellings of file names
+and invalid sets of arguments (including commands with the right number of 
+arguments but the wrong types) by printing out informative messages.
+
+# -------------- Handling no results ---------------------
+
+>> python index.py BigWiki.xml title_file.txt docs_file.txt words_file.txt
+File successfully indexed!
+
+>> python query.py --pagerank title_file.txt docs_file.txt words_file.txt
+Search for pages here: the  
+No results for that search.
+Search for pages here:
+No results for that search.
+Search for pages here:  
+No results for that search.
+Search for pages here: " "
+No results for that search.
+Search for pages here: hgoihnj
+No results for that search.
+
+These tests confirm that the search engine correctly handles stop words, empty 
+strings, spaces & quote marks, and words not in the corpus by not indexing those
+things and by printing out an informative message when they are searched for.
+
+# -------------- testing pagerank's influence -------------
+
+>> python index.py test_pr_wiki.xml title_file.txt docs_file.txt words_file.txt
+File successfully indexed!
+
+>> python query.py title_file.txt docs_file.txt words_file.txt             
+Search for pages here: tall
+1 New York City
+2 Skyscrapers
+
+>> python query.py --pagerank title_file.txt docs_file.txt words_file.txt  
+Search for pages here: tall
+1 Skyscrapers
+2 New York City
+
+We set up test_pr_wiki such that the word "tall" appears more frequently on the 
+New York City page, but that Skyscrapers is linked more by other pages.  This
+test confirms that using pagerank or not changes which of those two pages is 
+listed first in the search results for the word "tall".
+
+# --------------- BigWiki.xml examples --------------------
+
+>> python index.py BigWiki.xml title_file.txt docs_file.txt words_file.txt
+File successfully indexed!
+
+# --- "geopolitical conflict" with and without pagerank ---
+
+>> python query.py title_file.txt docs_file.txt words_file.txt
+Search for pages here: geopolitical conflict
+1 List of conflicts in the Near East
+2 FSF
+3 Psychoanalysis
+4 Front line
+5 Protocol on Environmental Protection to the Antarctic Treaty
+6 Guerrilla warfare
+7 Irredentism
+8 Family law
+9 Organization for Security and Co-operation in Europe
+10 Fuel-air explosive
+
+>> python query.py --pagerank title_file.txt docs_file.txt words_file.txt
+Search for pages here: geopolitical conflict
+1 Middle Ages
+2 Holy Roman Empire
+3 Middle East
+4 Organization for Security and Co-operation in Europe
+5 Pakistan
+6 North Africa
+7 Indonesia
+8 NATO
+9 Ottoman Empire
+10 Far East
+
+# ------ "dark ages" with and without pagerank -------
+
+>> python query.py title_file.txt docs_file.txt words_file.txt
+Search for pages here: dark ages
+1 Heart of Darkness
+2 Middle Ages
+3 Iron Age
+4 Hellenic Greece
+5 Demographics of Macau
+6 Laura Bertram
+7 Free-running sleep
+8 Neogene
+9 Historical revisionism
+10 Four-poster
+
+>> python query.py --pagerank title_file.txt docs_file.txt words_file.txt
+Search for pages here: dark ages
+1 Middle Ages
+2 Iron Age
+3 Mesopotamia
+4 Neolithic
+5 Holy Roman Empire
+6 India
+7 Norway
+8 Heart of Darkness
+9 Germanic peoples
+10 Indo-European languages
+
+In both of these examples from BigWiki, the non-pagerank results tend to be more 
+obscure pages (FSF, Front line, Irredentism, Laura Bertram, Four-poster) while 
+results with pagerank factored in tend to be pages on more well-known topics, 
+which we can reasonably assume will have more links to them and thus higher 
+PageRank scores.  This helped us confirm that our overall implementation of 
+PageRank is working as intended in both the indexing and querying components.
+
+# ----------- Selected MedWiki.xml TA examples --------
+
+>> python index.py MedWiki.xml title_file.txt docs_file.txt words_file.txt
+File successfully indexed!
+
+# ---- "baseball" with and without pagerank -----
+
+>> python query.py title_file.txt docs_file.txt words_file.txt
+Search for pages here: baseball
+1 Oakland Athletics
+2 Minor league baseball
+3 Kenesaw Mountain Landis
+4 Miami Marlins
+5 Fantasy sport
+6 Out
+7 October 30
+8 January 7
+9 Hub
+10 February 2
+
+>> python query.py --pagerank title_file.txt docs_file.txt words_file.txt
+Search for pages here: baseball
+1 Ohio
+2 February 2
+3 Oakland Athletics
+4 Kenesaw Mountain Landis
+5 Netherlands
+6 Miami Marlins
+7 Minor league baseball
+8 Kansas
+9 Pennsylvania
+10 Fantasy sport
+
+# --- "United States" with and without pagerank ---
+
+>> python query.py title_file.txt docs_file.txt words_file.txt
+Search for pages here: United States
+1 Federated States of Micronesia
+2 Imperial units
+3 Joule
+4 Knowledge Aided Retrieval in Activity Context
+5 Imperialism in Asia
+6 Elbridge Gerry
+7 Martin Van Buren
+8 Pennsylvania
+9 Finite-state machine
+10 Metastability
+
+>> python query.py --pagerank title_file.txt docs_file.txt words_file.txt
+Search for pages here: United States
+1 Netherlands
+2 Ohio
+3 Illinois
+4 Michigan
+5 Pakistan
+6 International Criminal Court
+7 Franklin D. Roosevelt
+8 Pennsylvania
+9 Norway
+10 Louisiana
+
+These examples of searches in MedWiki.xml closely match the TA examples, further
+confirming that our algorithms prioritize pages correctly for both term
+relevance only and with PageRank factored in.

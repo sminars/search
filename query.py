@@ -46,7 +46,7 @@ class Query:
             # do pagerank
             self.pagerank = True
             file_list = args[1:]
-        elif len(args) == 3:
+        elif len(args) == 3 and all([arg[-4:] == '.txt' for arg in args]):
             # we don't do pagerank
            file_list = args
         else:
@@ -153,14 +153,17 @@ if __name__ == "__main__":
     """
     try:
         q = Query(sys.argv[1:])
+
+        while True is True:  # continue until break statement is reached
+            response = input("Search for pages here: ")
+            if response == ':quit':
+                break
+            q.print_results(response)
     except FileNotFoundError:
         print("File not found -- try again.")
     except ArgumentError:
         print("Invalid command line arguments, try again.  Arguments must take"
-        + " the form <title-file>.txt <docs-file>.txt <words-file>.txt")
+        + " the form: \n    --pagerank <title-file>.txt <docs-file>.txt" 
+        + " <words-file>.txt \nwhere --pagerank is an optional argument.")
 
-    while True is True:  # continue until break statement is reached
-        response = input("Search for pages here: ")
-        if response == ':quit':
-            break
-        q.print_results(response)
+    

@@ -7,7 +7,7 @@
     <page>
         <title>New York City</title>
         <id>2</id>
-        <text>NYC has many [[Skyscrapers|tall buildings]] that get build.</text>
+        <text>NYC has many [[Skyscrapers|tall buildings]] that get build. So very tall.</text>
     </page>
     <page>
         <title>Blood Oranges</title>
@@ -20,9 +20,9 @@
         <text>Many people live here and commute to [[New York]].  No one has build [[Skyscrapers]] here.</text>
     </page>
     <page>
-        <title>Aluminum Foil</title>
+        <title>Dubai</title>
         <id>5</id>
-        <text>Used in kitchens, build out of [[aluminum]].</text>
+        <text>Has some of the [[Skyscrapers|tallest buildings]] in the world.</text>
     </page>
     <page>
         <title>Skyscrapers</title>
